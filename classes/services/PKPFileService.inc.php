@@ -31,19 +31,19 @@ class PKPFileService {
 	 * Initialize and configure flysystem
 	 */
 	public function __construct() {
-
+		$umask = Config::getVar('files', 'umask', 0022);
 		$adapter = new Local(
 			Config::getVar('files', 'files_dir'),
 			LOCK_EX,
 			Local::DISALLOW_LINKS,
 			[
 				'file' => [
-					'public' => FILE_MODE_MASK,
-					'private' => FILE_MODE_MASK,
+					'public' => FILE_MODE_MASK & ~$umask,
+					'private' => FILE_MODE_MASK  & ~$umask,
 				],
 				'dir' => [
-					'public' => DIRECTORY_MODE_MASK,
-					'private' => DIRECTORY_MODE_MASK,
+					'public' => DIRECTORY_MODE_MASK & ~$umask,
+					'private' => DIRECTORY_MODE_MASK & ~$umask,
 				]
 			]
 		);
@@ -161,7 +161,7 @@ class PKPFileService {
 		header("Content-Type: $mimetype");
 		header("Content-Length: $filesize");
 		header('Accept-Ranges: none');
-		header('Content-Disposition: ' . ($inline ? 'inline' : 'attachment') . ";filename=\"$encodedFilename\";filename*=UTF-8''\"$encodedFilename\"");
+		header('Content-Disposition: ' . ($inline ? 'inline' : 'attachment') . ";filename=\"$encodedFilename\";filename*=UTF-8''$encodedFilename");
 		header('Cache-Control: private'); // Workarounds for IE weirdness
 		header('Pragma: public');
 

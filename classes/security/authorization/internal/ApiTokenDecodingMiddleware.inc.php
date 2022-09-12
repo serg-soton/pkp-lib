@@ -16,6 +16,7 @@
 use \Firebase\JWT\JWT;
 
 use Firebase\JWT\SignatureInvalidException;
+use Slim\Http\Request as SlimRequest;
 
 class ApiTokenDecodingMiddleware {
 	/** @var APIHandler $handler Reference to api handler */
@@ -37,7 +38,16 @@ class ApiTokenDecodingMiddleware {
 	 * @return boolean|string
 	 */
 	protected function _decode($slimRequest) {
-		$jwt = $slimRequest->getQueryParam('apiToken');
+		try {
+			$jwt = $this->getJWT($slimRequest);
+		} catch (Exception $e) {
+			$request = $this->_handler->getRequest();
+			return $request->getRouter()
+				->handleAuthorizationFailure(
+					$request,
+					$e->getMessage()
+				);
+		}
 		if (!$jwt) {
 			/**
 			 * If we don't have a token, it's for the authentication logic to handle if it's a problem.
@@ -120,6 +130,30 @@ class ApiTokenDecodingMiddleware {
 
 		$response = $next($request, $response);
 		return $response;
+	}
+
+	protected function getJWT(SlimRequest $slimRequest) {
+
+		$authHeader = $slimRequest->getHeader('Authorization');
+
+		if (!count($authHeader) || empty($authHeader[0])) {
+			return $slimRequest->getQueryParam('apiToken');
+		}
+
+		// Several authorization methods may be supplied with commas between them.
+		// For example: Basic basic_auth_string_here, Bearer api_key_here
+		// JWT uses the Bearer scheme with an API key. Ignore the others.
+		$clauses = explode(',', $authHeader[0]);
+		foreach ($clauses as $clause) {
+			// Split the authorization scheme and parameters and look for the Bearer scheme.
+			$parts = explode(' ', trim($clause));
+			if (count($parts) == 2 && $parts[0] == 'Bearer') {
+				// Found bearer authorization; return the token.
+				return $parts[1];
+			}
+
+		}
+		return null;
 	}
 }
 

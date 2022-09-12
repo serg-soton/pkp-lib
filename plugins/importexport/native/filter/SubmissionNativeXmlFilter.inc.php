@@ -87,6 +87,7 @@ class SubmissionNativeXmlFilter extends NativeExportFilter {
 		$deployment->setSubmission($submission);
 		$submissionNode = $doc->createElementNS($deployment->getNamespace(), $deployment->getSubmissionNodeName());
 
+		$submissionNode->setAttribute('locale', $submission->getData('locale'));
 		$submissionNode->setAttribute('date_submitted', strftime('%Y-%m-%d', strtotime($submission->getData('dateSubmitted'))));
 		$submissionNode->setAttribute('status', $submission->getData('status'));
 		$submissionNode->setAttribute('submission_progress', $submission->getData('submissionProgress'));
@@ -135,7 +136,18 @@ class SubmissionNativeXmlFilter extends NativeExportFilter {
 		foreach ($submissionFilesIterator as $submissionFile) {
 			// Skip files attached to objects that are not included in the export,
 			// such as files uploaded to discussions and files uploaded by reviewers
-			if (in_array($submissionFile->getData('fileStage'), [SUBMISSION_FILE_QUERY, SUBMISSION_FILE_NOTE, SUBMISSION_FILE_REVIEW_ATTACHMENT])) {
+			$excludedFileStages = [
+				SUBMISSION_FILE_QUERY,
+				SUBMISSION_FILE_NOTE,
+				SUBMISSION_FILE_REVIEW_ATTACHMENT,
+				SUBMISSION_FILE_REVIEW_FILE,
+				SUBMISSION_FILE_REVIEW_ATTACHMENT,
+				SUBMISSION_FILE_REVIEW_REVISION,
+				SUBMISSION_FILE_INTERNAL_REVIEW_FILE,
+				SUBMISSION_FILE_INTERNAL_REVIEW_REVISION
+			];
+
+			if (in_array($submissionFile->getData('fileStage'), $excludedFileStages)) {
 				$this->getDeployment()->addWarning(ASSOC_TYPE_SUBMISSION, $submission->getId(), __('plugins.importexport.native.error.submissionFileSkipped', array('id' => $submissionFile->getId())));
 				continue;
 			}
