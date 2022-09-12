@@ -99,11 +99,16 @@ class RegistrationForm extends Form {
 		}
 
 		$isoCodes = new \Sokil\IsoCodes\IsoCodesFactory();
-		$countries = array();
+		// ICEC: put UK first
+		$countries1 = array();
 		foreach ($isoCodes->getCountries() as $country) {
-			$countries[$country->getAlpha2()] = $country->getLocalName();
+			$countries1[$country->getAlpha2()] = $country->getLocalName();
 		}
-		asort($countries);
+		$countries2 = array();
+		$countries2['GB'] = 'United Kingdom';
+		asort($countries1);
+		unset($countries1['GB']);
+		$countries = $countries2 + $countries1;
 		$templateMgr->assign('countries', $countries);
 
 		import('lib.pkp.classes.user.form.UserFormHelper');

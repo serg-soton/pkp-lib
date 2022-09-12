@@ -148,13 +148,16 @@
 				paste_auto_cleanup_on_paste: true,
 				apply_source_formatting: false,
 				theme: 'modern',
-				toolbar: 'copy paste | bold italic underline | link unlink ' +
+				toolbar: 'copy paste | nanospell | bold italic underline | link unlink ' +
 						'code fullscreen | image | pkpTags',
-				richToolbar: 'copy paste | bold italic underline | bullist numlist | ' +
-						'superscript subscript | link unlink code fullscreen | ' +
+				richToolbar: 'copy paste | nanospell | bold italic underline | bullist numlist | ' +
+						'superscript subscript link unlink code fullscreen | ' +
 						'image | pkpTags',
 				statusbar: false,
-				content_css: contentCSS
+				content_css: contentCSS,
+				// ICEC: add spell check
+				external_plugins: {'nanospell': 'https://submissions.evolvingcities.org/lib/pkp/lib/vendor/nanospell.tinymce/plugin.js'},
+				nanospell_server: 'php'
 			};
 
 			// Support image uploads

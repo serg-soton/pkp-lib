@@ -34,6 +34,9 @@
 		"vendor-dir": "lib/vendor",
 		"platform": {
 			"php": "7.3.0"
+		},
+		"allow-plugins": {
+			"cweagans/composer-patches": true
 		}
 	},
 	"repositories": [
